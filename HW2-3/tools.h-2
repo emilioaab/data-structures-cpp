@@ -1,6 +1,0 @@
-#pragma once
-#include "Restaurant.h"
-
-void printMenuItems(Item** items, int itemsSize);
-Order* minCalories(Restaurant &res);
-
