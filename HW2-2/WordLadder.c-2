@@ -1,0 +1,306 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include"WordLadder.h"
+
+
+void handle_allocation_failure(void *ptr) { // Function to handle memory allocation failure
+    if (ptr == NULL) {
+        printf("Memory allocation failed!\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+Node *allocate_memory() { // Function to allocate memory for a new node
+    Node *fresh_node = (Node *) malloc(sizeof(Node));
+    handle_allocation_failure(fresh_node);
+    return fresh_node;
+}
+
+void copy_word_to_node(Node *node, char *word) { // Function to copy a word to a node
+    strcpy(node->word, word);
+}
+
+void set_next_to_null(Node *node) { // Function to set the next pointer of a node to NULL
+    node->next = NULL;
+}
+
+Node *allocate_node(char *word) { // Function to allocate memory for a new node and copy a word to it
+    Node *fresh_node = allocate_memory();
+    copy_word_to_node(fresh_node, word);
+    set_next_to_null(fresh_node);
+    return fresh_node;
+}
+
+Node *get_last_node(Node **head) { // Function to get the last node of a linked list
+    Node *temp = *head;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    return temp;
+}
+
+
+void print_node_word(Node *node) { // Function to print the word of a node
+    printf("%s\n", node->word);
+}
+
+void print_linked_list(Node *head) { // Function to print the words of a linked list
+    while (head != NULL) {
+        print_node_word(head);
+        head = head->next;
+    }
+}
+
+void add_node_at_end(Node **head, char *word) { // Function to add a node at the end of a linked list
+    Node *new_node = allocate_node(word);
+    (*head == NULL) ? (*head = new_node) : (get_last_node(head)->next = new_node);
+}
+
+
+void init_stack(Node **stack_top) { // Function to initialize a stack
+    *stack_top = NULL;
+}
+
+void push(Node **top, char *word) { // Function to push a word to a stack
+    Node *newNode = allocate_node(word);
+    newNode->next = *top;
+    *top = newNode;
+}
+
+int is_stack_empty(Node *top) { // Function to check if a stack is empty
+    return top == NULL;
+}
+
+void find_node(Node **dictionary, char *word, Node **current_node,
+               Node **previous_node) { // Function to find a node in a linked list
+    *current_node = *dictionary;
+    *previous_node = NULL;
+
+    while (*current_node != NULL && strcmp((*current_node)->word, word) != 0) { // Find the node to be removed
+        *previous_node = *current_node;
+        *current_node = (*current_node)->next;
+    }
+}
+
+void update_links(Node **dictionary, Node *current_node,
+                  Node *previous_node) { // Function to update the links of a linked list
+    (previous_node == NULL) ? (*dictionary = current_node->next) : (previous_node->next = current_node->next);
+}
+
+void remove_node(Node **dictionary, Node *current_node,
+                 Node *previous_node) { // Function to remove a node from a linked list
+    update_links(dictionary, current_node, previous_node);
+    free(current_node);
+}
+
+void pop(Node **dictionary, char *word) { // Function to pop a word from a stack
+    if (is_stack_empty(*dictionary)) {
+        printf("Error! The dictionary file is empty!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Node *current_node = NULL;
+    Node *previous_node = NULL;
+    find_node(dictionary, word, &current_node, &previous_node);
+
+    if (current_node == NULL) { // Check if the word was found
+        printf("Error! Unfortunately the word was not found in the dictionary!\n");
+        exit(1);
+    }
+
+    remove_node(dictionary, current_node, previous_node); // Remove the node
+}
+
+
+void init_queue(Node **front, Node **rear) { // Function to initialize a queue
+    *front = NULL;
+    *rear = NULL;
+}
+
+int verify_queue_empty(Node *front) { // Function to verify if a queue is empty
+    return front == NULL; // Return 1 if the queue is empty, 0 otherwise
+}
+
+void enqueue(Node **front, Node **rear, char *word) { // Function to enqueue a word to a queue
+    Node *newNode = allocate_node(word); // Allocate memory for a new node
+    (*rear == NULL) ? (*front = *rear = newNode) : ((*rear = (*rear)->next = newNode)); // Enqueue the word
+}
+
+int is_queue_empty(Node **front) { // Function to check if a queue is empty
+    return *front == NULL;
+}
+
+void get_word_from_node(Node **front, char *word) { // Function to get a word from a node
+    Node *temp = *front;
+    strcpy(word, temp->word);
+}
+
+void update_queue(Node **front, Node **rear) { // Function to update a queue
+    *front = (*front)->next;
+    *rear = (*front != NULL) ? *rear : NULL;
+}
+
+void dequeue(Node **front, Node **rear, char *word) { // Function to dequeue a word from a queue
+    if (is_queue_empty(front)) {
+        printf("Error! Unfortunately the queue is empty!\n");
+        exit(1);
+    }
+    get_word_from_node(front, word);
+    Node *temp = *front;
+    update_queue(front, rear);
+    free(temp);
+}
+
+
+Node *get_next_node(Node *node) { // Function to get the next node of a linked list
+    return node->next;
+}
+
+void free_node(Node *node) { // Function to free a node
+    free(node);
+}
+
+void free_linked_list(Node *head) { // Function to free a linked list
+    Node *temp;
+    while (head != NULL) {
+        temp = head;
+        head = get_next_node(head);
+        free_node(temp);
+    }
+}
+
+int get_string_length(const char *word) { // Function to get the length of a string
+    return strlen(word);
+}
+
+int compare_string_length(int len1, int len2) { // Function to compare the length of two strings
+    return len1 == len2;
+}
+
+int compare_characters(const char *word1, const char *word2,
+                       int index) { // Function to compare the characters of two strings
+    return word1[index] != word2[index];
+}
+
+int compare_string_lengths(int len1, int len2) { // Function to compare the lengths of two strings
+    return len1 == len2;
+}
+
+int count_character_differences(const char *word1, const char *word2,
+                                int len) { // Function to count the character differences of two strings
+    int difference_count = 0;
+    for (int i = 0; i < len; i++) {
+        if (word1[i] != word2[i]) {
+            difference_count++;
+            if (difference_count > 1)
+                return 0;
+        }
+    }
+    return difference_count;
+}
+
+int
+differs_by_one_char(const char *word1, const char *word2) { // Function to check if two strings differ by one character
+    int len1 = strlen(word1);
+    int len2 = strlen(word2);
+
+    if (!compare_string_lengths(len1, len2))
+        return 0;
+
+    int difference_count = count_character_differences(word1, word2, len1); // Count the character differences
+
+    return difference_count == 1;
+}
+
+
+Node *get_next_visited_word(Node *node) { // Function to get the next visited word
+    return node->next;
+}
+
+int compare_visited_word(Node *node, char *word) { // Function to compare the visited word
+    return strcmp(node->word, word) == 0;
+}
+
+int check_word_visited(Node *visitedWords, char *word) { // Function to check if a word is visited
+    Node *temp = visitedWords;
+    while (temp != NULL) {
+        if (compare_visited_word(temp, word)) {
+            return 1;
+        }
+        temp = get_next_visited_word(temp);
+    }
+    return 0;
+}
+
+int are_words_same(const char *initial_word, const char *final_word) {
+    return strcmp(initial_word, final_word) == 0;
+}
+
+void print_and_return_if_same(const char *initial_word, const char *final_word) {
+    if (are_words_same(initial_word, final_word)) {
+        printf("Initial and final words are the same.\n");
+        return;
+    }
+}
+
+void
+generate_word_ladder(char *initial_word, char *final_word, Node *dictionary) { // Function to generate a word ladder
+    print_and_return_if_same(initial_word, final_word);
+
+    int is_found = 0;
+    Node *queue_head = NULL;
+    Node *queue_tail = NULL;
+    Node *word_stack = NULL;
+    add_node_at_end(&queue_head, initial_word);
+    queue_tail = queue_head;
+    Node *processed_words = NULL;
+
+    while (queue_head != NULL && !is_found) {
+        char current[MAX_WORD_LENGTH];
+        dequeue(&queue_head, &queue_tail, current);
+        add_node_at_end(&word_stack, current);
+
+        if (strcmp(current, final_word) == 0) {
+            is_found = 1;
+            break;
+        }
+        Node *temp_node = dictionary;
+        while (temp_node != NULL) {
+            if (strcmp(temp_node->word, current) != 0 && strlen(temp_node->word) == strlen(current) &&
+                differs_by_one_char(temp_node->word, current) &&
+                !check_word_visited(processed_words, temp_node->word)) {
+                add_node_at_end(&queue_head, temp_node->word);
+                add_node_at_end(&processed_words, temp_node->word);
+                if (strcmp(temp_node->word, final_word)) {
+                    break;
+                }
+                if (queue_tail == NULL) {
+                    queue_tail = queue_head;
+                }
+            }
+            temp_node = temp_node->next;
+        }
+
+        add_node_at_end(&processed_words, current);
+    }
+
+    if (is_found) {
+        printf("Word ladder found:\n");
+        while (word_stack != NULL) {
+            printf("%s", word_stack->word);
+            if (word_stack->next != NULL) {
+                printf(" -> ");
+            }
+            Node *temp = word_stack;
+            word_stack = word_stack->next;
+            free(temp);
+        }
+        printf("\n");
+    } else {
+        printf("Unfortunately! No word ladder was found.\n");
+    }
+    free_linked_list(processed_words);
+    free_linked_list(word_stack);
+    free_linked_list(queue_head);
+
+} // End of the function

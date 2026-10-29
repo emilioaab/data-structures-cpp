@@ -1,0 +1,45 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "WordLadder.h"
+
+// Forward declarations for additional helper functions
+void readWordsAndGenerateLadder(Node **dictionary);
+
+int main() {
+    const char *filePath = "/Users/emilioaab/CLionProjects/HW2__/dict1.txt";
+    Node *dictionary = NULL;
+
+    // Open and read the file, and fill the dictionary
+    FILE *file = fopen(filePath, "r");
+    if (!file) {
+        perror("Failed to open file");
+        return EXIT_FAILURE;
+    }
+
+    char word[MAX_WORD_LENGTH];
+    while (fscanf(file, "%s", word) != EOF) {
+        add_node_at_end(&dictionary, word);
+    }
+    fclose(file);
+
+    // Interact with the user and generate the word ladder
+    readWordsAndGenerateLadder(&dictionary);
+
+    // Clean up resources
+    free_linked_list(dictionary);
+    return EXIT_SUCCESS;
+}
+
+void readWordsAndGenerateLadder(Node **dictionary) { // Function to read the start and end words and generate the word ladder
+    char start_word[MAX_WORD_LENGTH], end_word[MAX_WORD_LENGTH];
+
+    printf("Enter start word: ");
+    scanf("%s", start_word);
+    printf("Enter end word: ");
+    scanf("%s", end_word);
+
+    generate_word_ladder(start_word, end_word, *dictionary); // Generate the word ladder
+}

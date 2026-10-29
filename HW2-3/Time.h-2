@@ -1,0 +1,40 @@
+#pragma once
+#define _CRT_SECURE_NO_WARNINGS
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+class Time {
+private:
+    int hours;
+    int minutes;
+    int seconds;
+
+public:
+    // Constructors
+    Time();
+    Time(int hrs, int mins, int secs);
+    string toString() const;
+    int compare(const Time& other) const;
+    Time(int totalSeconds);
+    Time(int hrs, int mnts);
+
+    // Setters and Getters
+    void setHours(int h);
+    int getHours();
+    void setMinutes(int m);
+    int getMinutes();
+    void setSeconds(int s);
+    int getSeconds();
+
+    //More Methods
+    int toSecond();
+    void fromSecond(int MaxSeconds);
+    //Printing Functions
+    void print();
+    void printAmPm(); //AM/PM Printing
+    void printTime();
+    void next(int increment = 1);
+
+};

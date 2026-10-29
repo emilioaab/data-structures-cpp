@@ -1,0 +1,148 @@
+#include "Order.h"
+
+Order::Order(string client)
+{
+    this->_client = client;
+    this->_orderTime = Time();
+    this->_items = nullptr;
+    this->_itemsSize = 0;
+}
+
+Order::Order(string client, Time time)
+{
+    this->_client = client;
+    this->_orderTime = time;
+    this->_items = nullptr;
+    this->_itemsSize = 0;
+}
+
+
+Order::Order(string client, Time time, Item** menu, int menuSize, int* indexList, int sizeIndexes):Order(client,time)//maybe dis work
+{
+    addItems(menu, menuSize, indexList, sizeIndexes);
+}
+
+Order::Order(string client, Time time, Item** menu, int menuSize, int index) : Order(client, time)
+{
+    addItems(menu, menuSize, index);
+}
+
+Order::Order(const Order& other)
+{
+    this->_client = other._client;
+    this->_orderTime = other._orderTime;
+    this->_itemsSize = other._itemsSize;
+    this->_items = new Item * [_itemsSize];
+    for (int i = 0; i < _itemsSize; i++)
+    {
+        this->_items[i] = other._items[i];
+    }
+}
+
+Order::~Order()
+{
+    if (_items) {
+        delete[] _items;
+    }
+}
+
+void Order::addItems(Item** menu, int menuSize, int* indexList, int sizeIndexes)
+{
+    Item** temp = new Item * [this->_itemsSize + sizeIndexes];
+    for (int i = 0; i < _itemsSize; i++)
+    {
+        temp[i] = this->_items[i];
+    }
+
+    for (int i = 0; i < sizeIndexes; i++)
+    {
+        temp[_itemsSize + i] = menu[indexList[i]-1];
+    }
+
+    if (_items)
+        delete[] _items;
+    _items = temp;
+    _itemsSize += sizeIndexes;
+}
+
+void Order::addItems(Item** menu, int menuSize, int index)
+{
+    Item** temp = new Item * [this->_itemsSize + 1 ];
+    for (int i = 0; i < _itemsSize; i++)
+    {
+        temp[i] = this->_items[i];
+    }
+    temp[_itemsSize] = menu[index - 1];
+
+    if(_items)
+        delete[] _items;
+
+    _items = temp;
+    _itemsSize++;
+}
+
+void Order::removeItem(int index)
+{
+    if(1 <= index && index <= _itemsSize)
+    {
+        Item** temp = new Item * [this->_itemsSize - 1];
+        for (int i = 0; i < index - 1; i++)
+        {
+            temp[i] = this->_items[i];
+        }
+
+        for (int i = index; i < _itemsSize; i++)
+        {
+            temp[i - 1] = this->_items[i];
+        }
+
+        if (_items)
+            delete[] _items;
+
+        this->_items = temp;
+        _itemsSize--;
+    }
+}
+
+double Order::getTotal() const
+{
+    double sum = 0;
+
+    for (int i = 0; i < _itemsSize; i++)
+    {
+        sum += _items[i]->getPrice();
+    }
+
+    return sum;
+}
+
+int Order::getCalories() const
+{
+    int sum = 0;
+
+    for (int i = 0; i < _itemsSize; i++)
+    {
+        sum += _items[i]->getCalories();
+    }
+
+    return sum;
+}
+
+string Order::toString() const
+{
+    string str = "Order[\'";
+    str += _client + "\', ";
+    str += this->_orderTime.toString() + ", ";
+    str += "(";
+    for (int i = 0; i < _itemsSize-1; i++)
+    {
+        str += _items[i]->toString()+", ";
+    }
+    if (this->_itemsSize)
+        str += _items[_itemsSize - 1]->toString();
+    str += "), ";
+    str += to_string(getTotal()) + "$, " + to_string(getCalories()) + "cal]";
+
+    return str;
+}
+
